@@ -1,27 +1,27 @@
-async function predictPrice() {
-    const productName = document.getElementById('productName').value.trim();
-    
+async function predictPrice(productName) {
     if (!productName) {
-        alert("Please enter a product name!");
-        return;
+        productName = document.getElementById('productName').value;
     }
 
     try {
-        const response = await fetch('http://localhost:5000/predict-price', {  // Add the full URL
+        console.log('Sending request for:', productName);
+        
+        const response = await fetch('http://localhost:5000/predict-price', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ product_name: productName }),
+            body: JSON.stringify({ product_name: productName })
         });
 
+        console.log('Response status:', response.status);
+        const data = await response.json();
+        console.log('Response data:', data);
+
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(data.error || `HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
-        
-        // Add result display function
         const resultDiv = document.getElementById('result');
         if (data.status === 'success') {
             resultDiv.innerHTML = `
@@ -37,7 +37,7 @@ async function predictPrice() {
         }
     } catch (error) {
         console.error("Error:", error);
-        showError("An unexpected error occurred. Please try again.");
+        showError(error.message || "An unexpected error occurred");
     }
 }
 
@@ -63,6 +63,7 @@ document.querySelectorAll('.product-cart').forEach(product => {
       predictPrice(productName);
   });
 });
+
 async function fetchLeaderboard() {
     try {
         const response = await fetch('http://localhost:5000/leaderboard');
